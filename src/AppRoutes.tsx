@@ -7,7 +7,6 @@ import Footer from './pages/Footer';
 import Settings from './pages/Settings';
 import FormulaireParametrage from './pages/FormulaireParametrage';
 import AjouterEvnt from './pages/ajouterEvnt'; 
-
 const AppRoutes: React.FC = () => {
   return (
     <Router>

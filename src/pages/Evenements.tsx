@@ -4,23 +4,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 // Déclaration du type d'événement
-interface Event {
-  title: string;
-  type: string;
-  targetType: string;
-  target: string;
-  paramUrl: string;
-}
+// interface Event {
+//   title: string;
+//   type: string;
+//   targetType: string;
+//   target: string;
+//   paramUrl: string;
+// }
 
 const events = [
   { title: "ELIG_CREDIT_IMMO_ANCC", type: "ANCC", targetType: "PRODUCT", target: "44003", paramUrl: "/parametrage/44003" },
   { title: "ELIG_FAMMON_ACTIV", type: "ACTIVATION", targetType: "FAMILY", target: "MONETIQUE", paramUrl: "/parametrage/34027" },
   { title: "ELIG_ECOM_ANNUALT", type: "ANNULATION_TICKET", targetType: "PRODUCT", target: "34027", paramUrl: "/parametrage/34027" },
   { title: "ELIG_IBH_EUROPE", type: "ASSISTANCE", targetType: "PRODUCT", target: "24067", paramUrl: "/parametrage/24067" },
+  { title: "ELIG_CREDIT_IMMO_ANCC", type: "ANCC", targetType: "PRODUCT", target: "44003", paramUrl: "/parametrage/44003" },
+  { title: "dounya", type: "ACTIVATION", targetType: "FAMILY", target: "MONETIQUE", paramUrl: "/parametrage/34027" },
+  { title: "ELIG_ECOM_ANNUALT", type: "ANNULATION_TICKET", targetType: "PRODUCT", target: "34027", paramUrl: "/parametrage/34027" },
+  { title: "ELIG_IBH_EUROPE", type: "ASSISTANCE", targetType: "PRODUCT", target: "24067", paramUrl: "/parametrage/24067" },
   // Ajouter d'autres événements ici
 ];
 
-const ITEMS_PER_PAGE = 4;
+const ITEMS_PER_PAGE = 6;
 
 const Evenements: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);

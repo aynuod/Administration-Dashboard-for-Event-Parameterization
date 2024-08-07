@@ -3,24 +3,24 @@ import { Home, BarChart, Users, Bell, Settings, ShoppingBag, Tag, Menu, X, LogOu
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Sidebar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false); // Initialiser à false pour que le sidebar soit fermé par défaut
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
 
   return (
-    <div className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-gray-700 text-white flex flex-col justify-between transition-width duration-300 z-50 ${isOpen ? 'w-64' : 'w-20'}`}>
+    <div className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-gray-900 text-white flex flex-col justify-between transition-width duration-300 z-50 ${isOpen ? 'w-64' : 'w-20'}`}>
       <div>
         <button onClick={toggleSidebar} className="p-4 text-white focus:outline-none">
           {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
         <nav className="space-y-2 p-4">
-          <a href="#" className="flex items-center p-2 rounded hover:bg-orange-500">
+          <a href="#evenements" className="flex items-center p-2 rounded hover:bg-orange-500">
             <Home className={`w-5 h-5 mr-2`} />
-            {isOpen && <span className="text-sm">Résumé des points</span>}
+            {isOpen && <span className="text-sm">Liste des événements</span>}
           </a>
-          <a href="#" className="flex items-center p-2 rounded hover:bg-orange-500">
+          <a href="#statistiques-des-transactions" className="flex items-center p-2 rounded hover:bg-orange-500">
             <BarChart className={`w-5 h-5 mr-2`} />
             {isOpen && <span className="text-sm">Statistiques des transactions</span>}
           </a>

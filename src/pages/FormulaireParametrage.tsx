@@ -11,11 +11,11 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 
-interface PointCondition {
-  type: string;
-  threshold: string;
-  points: number;
-}
+// interface PointCondition {
+//   type: string;
+//   threshold: string;
+//   points: number;
+// }
 
 interface EligibilityCondition {
   type: string;
@@ -31,7 +31,7 @@ interface Condition {
 
 const FormulaireParametrage: React.FC = () => {
   const [conditions, setConditions] = useState<Condition[]>([]);
-  const [pointConditions, setPointConditions] = useState<PointCondition[]>([]);
+  // const [pointConditions, setPointConditions] = useState<PointCondition[]>([]);
   const [eligibilityConditions, setEligibilityConditions] = useState<EligibilityCondition[]>([]);
   const [selectedType, setSelectedType] = useState<string>('Montant');
   const [error, setError] = useState<string | null>(null);

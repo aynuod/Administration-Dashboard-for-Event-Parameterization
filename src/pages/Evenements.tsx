@@ -18,7 +18,7 @@ const events = [
   { title: "ELIG_ECOM_ANNUALT", type: "ANNULATION_TICKET", targetType: "PRODUCT", target: "34027", paramUrl: "/parametrage/34027" },
   { title: "ELIG_IBH_EUROPE", type: "ASSISTANCE", targetType: "PRODUCT", target: "24067", paramUrl: "/parametrage/24067" },
   { title: "ELIG_CREDIT_IMMO_ANCC", type: "ANCC", targetType: "PRODUCT", target: "44003", paramUrl: "/parametrage/44003" },
-  { title: "dounya", type: "ACTIVATION", targetType: "FAMILY", target: "MONETIQUE", paramUrl: "/parametrage/34027" },
+  { title: "ELIG", type: "ACTIVATION", targetType: "FAMILY", target: "MONETIQUE", paramUrl: "/parametrage/34027" },
   { title: "ELIG_ECOM_ANNUALT", type: "ANNULATION_TICKET", targetType: "PRODUCT", target: "34027", paramUrl: "/parametrage/34027" },
   { title: "ELIG_IBH_EUROPE", type: "ASSISTANCE", targetType: "PRODUCT", target: "24067", paramUrl: "/parametrage/24067" },
   // Ajouter d'autres événements ici
@@ -52,7 +52,7 @@ const Evenements: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <Button onClick={() => window.location.href = "/ajouterEvnt"}>
-           + Ajouter événement
+           + Paramétrer événement
           </Button>
         </div>
       </div>

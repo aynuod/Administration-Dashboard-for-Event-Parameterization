@@ -16,6 +16,10 @@ interface EventCardProps {
 const EventCard: React.FC<EventCardProps> = ({ event }) => {
   const navigate = useNavigate();
 
+  const handleModifyClick = () => {
+    navigate(event.paramUrl, { state: { event } });// passer l'objet event à la nouvelle page.
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -25,8 +29,9 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
         <p>Événement: {event.type}</p>
         <p>Typologie Cible: {event.targetType}</p>
         <p>Cible: {event.target}</p>
-        <Button onClick={() => navigate(event.paramUrl)}>
-          Paramétrer
+        {/* <Button onClick={() => navigate(event.paramUrl)}></Button> */}
+        <Button onClick={handleModifyClick}>
+         Modifier
         </Button>
       </CardContent>
     </Card>

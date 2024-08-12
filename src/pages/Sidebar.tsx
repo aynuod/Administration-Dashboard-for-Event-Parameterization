@@ -16,11 +16,11 @@ const Sidebar: React.FC = () => {
           {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
         <nav className="space-y-2 p-4">
-          <a href="#evenements" className="flex items-center p-2 rounded hover:bg-orange-500">
+          <a href="/dashboard#evenements" className="flex items-center p-2 rounded hover:bg-orange-500">
             <Home className={`w-5 h-5 mr-2`} />
             {isOpen && <span className="text-sm">Liste des événements</span>}
           </a>
-          <a href="#statistiques-des-transactions" className="flex items-center p-2 rounded hover:bg-orange-500">
+          <a href="/dashboard#statistiques-des-transactions" className="flex items-center p-2 rounded hover:bg-orange-500">
             <BarChart className={`w-5 h-5 mr-2`} />
             {isOpen && <span className="text-sm">Statistiques des transactions</span>}
           </a>

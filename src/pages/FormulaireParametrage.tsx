@@ -25,7 +25,7 @@ const FormulaireParametrage: React.FC = () => {
   const location = useLocation();
   //Récupération des Données de Navigation mn { state: { event } }
   const event = location.state?.event;
-  const [code, setCode] = useState(event ? event.title : '');
+  const [code] = useState(event ? event.title : '');
   const [description, setDescription] = useState(event ? event.type : '');
   const [typologieCible, setTypologieCible] = useState(event ? event.targetType : '');
   const [produitCible, setProduitCible] = useState(event ? event.target : '');

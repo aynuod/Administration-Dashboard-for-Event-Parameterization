@@ -20,7 +20,7 @@ const Header: React.FC = () => {
         onClick={handleLogoClick} // Associez le gestionnaire d'événements
         style={{ cursor: 'pointer' }} // Changez le curseur pour indiquer qu'il est cliquable
       />
-      <span className="text-orange-500">Brique de fidélité</span>
+      <span className="text-orange-500" onClick={handleLogoClick}>Brique de fidélité</span>
     </header>
   );
 };

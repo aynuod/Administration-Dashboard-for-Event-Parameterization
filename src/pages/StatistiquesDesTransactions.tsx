@@ -1,5 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import React, { useEffect, useState } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 // Fonction pour générer des données simulées
 const generateRandomData = () => {
@@ -16,11 +25,11 @@ const StatistiquesDesTransactions = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setChartData(prevData => {
+      setChartData((prevData) => {
         const newData = generateRandomData();
         return [...prevData.slice(-9), newData]; // Conserve les 10 dernières données
       });
-    }, 1000); // Met à jour les données toutes les secondes
+    }, 60000); // Met à jour les données toutes les minutes
 
     return () => clearInterval(interval);
   }, []);
@@ -35,8 +44,18 @@ const StatistiquesDesTransactions = () => {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="pointsEarned" stroke="#8884d8" name="Points Gagnés" />
-          <Line type="monotone" dataKey="transactions" stroke="#82ca9d" name="Transactions" />
+          <Line
+            type="monotone"
+            dataKey="pointsEarned"
+            stroke="#8884d8"
+            name="Points Gagnés"
+          />
+          <Line
+            type="monotone"
+            dataKey="transactions"
+            stroke="#82ca9d"
+            name="Transactions"
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>

@@ -1,42 +1,51 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import EventCard from './EventCard';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import axios from 'axios';
 
 // Déclaration du type d'événement
-// interface Event {
-//   title: string;
-//   type: string;
-//   targetType: string;
-//   target: string;
-//   paramUrl: string;
-// }
-
-const events = [
-  { title: "ELIG_CREDIT_IMMO_ANCC", type: "ANCC", targetType: "PRODUCT", target: "44003", paramUrl: "/parametrage/44003" },
-  { title: "ELIG_FAMMON_ACTIV", type: "ACTIVATION", targetType: "FAMILY", target: "MONETIQUE", paramUrl: "/parametrage/34027" },
-  { title: "ELIG_ECOM_ANNUALT", type: "ANNULATION_TICKET", targetType: "PRODUCT", target: "34027", paramUrl: "/parametrage/34027" },
-  { title: "ELIG_IBH_EUROPE", type: "ASSISTANCE", targetType: "PRODUCT", target: "24067", paramUrl: "/parametrage/24067" },
-  { title: "ELIG_CREDIT_IMMO_ANCC", type: "ANCC", targetType: "PRODUCT", target: "44003", paramUrl: "/parametrage/44003" },
-  { title: "ELIG", type: "ACTIVATION", targetType: "FAMILY", target: "MONETIQUE", paramUrl: "/parametrage/34027" },
-  { title: "ELIG_ECOM_ANNUALT", type: "ANNULATION_TICKET", targetType: "PRODUCT", target: "34027", paramUrl: "/parametrage/34027" },
-  { title: "ELIG_IBH_EUROPE", type: "ASSISTANCE", targetType: "PRODUCT", target: "24067", paramUrl: "/parametrage/24067" },
-  // Ajouter d'autres événements ici
-];
+interface Event {
+  id: string;
+  code: string;
+  description: string;
+  typologie: string;
+  produit: string;
+  points: number;
+  conditionCode: number[];
+}
 
 const ITEMS_PER_PAGE = 6;
 
 const Evenements: React.FC = () => {
+  const [events, setEvents] = useState<Event[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
 
+useEffect(() => {
+  axios
+    .get("http://localhost:8080/api/v1/events/all")
+    .then((response) => {
+      console.log("Réponse complète : ", response); // Affiche la réponse complète
+      console.log("Données récupérées : ", response.data); // Affiche les données spécifiques
+      setEvents(response.data);
+    })
+    .catch((error) => {
+      console.error("Erreur lors de la récupération des données : ", error);
+    });
+}, []);
+
+
   const filteredEvents = events.filter(event =>
-    event.title.toLowerCase().includes(searchTerm.toLowerCase())
+    event.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredEvents.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentEvents = filteredEvents.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  
+  console.log("Événements filtrés :", currentEvents); // Vérifie les événements filtrés ici 
+
 
   return (
     <div>
@@ -57,8 +66,8 @@ const Evenements: React.FC = () => {
         </div>
       </div>
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {currentEvents.map((event, index) => (
-          <EventCard key={index} event={event} />
+        {currentEvents.map((event) => (
+          <EventCard key={event.id} event={event} />
         ))}
       </div>
       <div className="flex justify-between items-center mt-4">

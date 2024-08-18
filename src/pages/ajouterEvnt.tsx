@@ -1,5 +1,6 @@
-import React, { useState, FormEvent } from "react";
+import React, { useState, useEffect, FormEvent } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Select from 'react-select';
 import {
   faBarcode,
   faTag,
@@ -11,6 +12,8 @@ import {
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import Sidebar from "./Sidebar";
+import {useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   Sheet,
   SheetContent,
@@ -19,143 +22,156 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-
-// interface PointCondition {
-//   type: string;
-//   threshold: string;
-//   points: number;
-// }
+import api from '../api/api';
 
 interface Condition {
-  id: number;
+  id: string;
+  code: number;
   type: string;
   description: string;
   label: string;
-  // points: number;
 }
 
 const FormulaireParametrage: React.FC = () => {
+  const navigate = useNavigate();
+  const [code, setCode] = useState("");
+  const [description, setDescription] = useState("");
+  const [typologiesCible, setTypologiesCible] = useState<string[]>([]);
+  const [typologieCible, setTypologieCible] = useState("");
+  const [produitsCible, setProduitsCible] = useState<any[]>([]);
+  const [produitCible, setProduitCible] = useState("");
+  const [points, setPoints] = useState(0);
   const [conditions, setConditions] = useState<Condition[]>([]);
-  // const [pointConditions, setPointConditions] = useState<PointCondition[]>([]);
-  const [selectedType, setSelectedType] = useState<string>("Montant");
   const [error, setError] = useState<string | null>(null);
-  let nextId = conditions.length + 1;
+  const [selectedCondition, setSelectedCondition] = useState<Condition | null>(null);
+  const [selectedLabel, setSelectedLabel] = useState("");
+  const [selectedDescription, setSelectedDescription] = useState("");
+  const [selectedCode, setSelectedCode] = useState(0);
+  const [allConditions, setAllConditions] = useState<Condition[]>([]);
+  const [selectOptions, setSelectOptions] = useState<any[]>([]);
 
-  type TypeOption = {
-    description: string;
-    labels: string[];
+
+  useEffect(() => {
+    axios.get(`${api}conditions/all`)
+      .then((response) => {
+        setAllConditions(response.data);
+        const options = response.data.map((condition: Condition) => ({
+          value: condition.id,
+          label: `${condition.code} - ${condition.label}`
+        }));
+        setSelectOptions(options);
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la récupération des conditions :", error);
+        setError("Erreur lors de la récupération des conditions.");
+      });
+  }, []);
+
+  useEffect(() => {
+    axios.get(`${api}products/domains`)
+      .then((response) => {
+        setTypologiesCible(response.data);
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la récupération des typologies :", error);
+        setError("Erreur lors de la récupération des typologies.");
+      });
+  }, []);
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+ 
+    const eventData = {
+       code,
+       description,
+       typologie: typologieCible,
+       produit: produitCible,
+       points,
+       conditionCode: conditions.length > 0 ? conditions.map(condition => condition.code) : [],
+    };
+ 
+   axios.post(`${api}events/save`, eventData) 
+       .then(response => {
+          console.log("Événement sauvegardé avec succès :", response.data);
+          navigate('/dashboard');
+       })
+       .catch(error => {
+          console.error("Erreur lors de la sauvegarde de l'événement :", error.response?.data || error.message);
+          setError(`Erreur lors de la sauvegarde de l'événement : ${error.response?.data?.message || error.message}`);
+       });
+ };
+ 
+  
+
+  const handleTypologieCibleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedTypologie = event.target.value;
+    setTypologieCible(selectedTypologie);
+    axios.get(`${api}products/product/${selectedTypologie}`)
+      .then((response) => {
+        setProduitsCible(response.data);
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la récupération des produits :", error);
+        setError("Erreur lors de la récupération des produits.");
+      });
   };
 
-  type TypeOptions = {
-    [key: string]: TypeOption; // Signature d'index ajoutée
-  };
-
-  const typeOptions: TypeOptions = {
-    Montant: {
-      description:
-        "Définir le montant minimum ou maximum des transactions pour l'accumulation de points.",
-      labels: ["Montant Minimum", "Montant Maximum"],
-    },
-    TypeT: {
-      description: "Définir le type de transaction bancaire concerné.",
-      labels: ["Dépôt", "Retrait", "Transfert", "Paiement"],
-    },
-    Fréquence: {
-      description:
-        "Définir la fréquence des transactions pour l'accumulation de points.",
-      labels: [
-        "Transaction Quotidienne",
-        "Transaction Hebdomadaire",
-        "Transaction Mensuelle",
-      ],
-    },
-    VIP: {
-      description: "Définir les conditions spécifiques pour les clients VIP.",
-      labels: ["Client VIP", "Client Gold", "Client Platine"],
-    },
-    Compte: {
-      description:
-        "Définir les types de comptes bancaires concernés pour l'accumulation de points.",
-      labels: ["Compte Épargne", "Compte Courant", "Compte Joint"],
-    },
-    Produit: {
-      description:
-        "Définir les produits bancaires concernés pour l'accumulation de points.",
-      labels: ["Carte de Crédit", "Prêt Personnel", "Assurance"],
-    },
-    TypeDeTransaction: {
-      description: "Définir le type de transaction spécifique pour les points.",
-      labels: [
-        "Transaction en Ligne",
-        "Transaction en Agence",
-        "Transaction Automatique",
-      ],
-    },
-    Employé: {
-      description:
-        "Définir si la transaction est effectuée par un employé d'Attijariwafa Bank.",
-      labels: ["Employé Attijariwafa", "Client Normal"],
-    },
-    ModeDeTransaction: {
-      description:
-        "Définir le mode de transaction pour l'accumulation de points.",
-      labels: ["En Ligne", "En Agence", "Mobile Banking"],
-    },
-    Objectif: {
-      description:
-        "Définir les objectifs spécifiques pour l'accumulation de points.",
-      labels: ["Objectif Annuel", "Objectif Trimestriel", "Objectif Mensuel"],
-    },
-    CatégorieClient: {
-      description:
-        "Définir les catégories de clients pour l'accumulation de points.",
-      labels: ["Client Régulier", "Client Privilégié", "Client Corporate"],
-    },
-  };
-
-  const handleDeleteCondition = (id: number) => {
+  const handleDeleteCondition = (id: string) => {
     setConditions(conditions.filter((condition) => condition.id !== id));
-  };
-
-  const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedType(event.target.value);
   };
 
   const handleAddCondition = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    // const points = parseInt(formData.get('points') as string, 10);
-
-    // if (!formData.get('type') || !formData.get('description') || !formData.get('label') || isNaN(points)) {
-    if (
-      !formData.get("type") ||
-      !formData.get("description") ||
-      !formData.get("label")
-    ) {
-      setError("Veuillez remplir tous les champs correctement.");
+    event.stopPropagation(); // Empêche la soumission globale
+  
+    if (!selectedCondition) {
+      setError("Veuillez sélectionner une condition.");
       return;
     }
-
+  
     const newCondition: Condition = {
-      type: formData.get("type") as string,
-      description: formData.get("description") as string,
-      label: formData.get("label") as string,
-      id: nextId++,
-      // points: points,
+      ...selectedCondition,
+      label: selectedLabel,
+      description: selectedDescription
     };
-
-    setConditions([...conditions, newCondition]);
-    event.currentTarget.reset();
+  
+    const conditionExists = conditions.some(c => c.id === newCondition.id);
+    if (!conditionExists) {
+      setConditions([...conditions, newCondition]);
+    } else {
+      setError("La condition est déjà présente.");
+    }
+  
+    setSelectedCondition(null);
+    setSelectedLabel("");
+    setSelectedDescription("");
+    setSelectedCode(0);
     setError(null);
   };
+  
+  
 
+  const handleConditionChange = (selectedOption: any) => {
+    const condition = allConditions.find(c => c.id === selectedOption.value);
+    
+    if (condition) {
+      setSelectedCondition(condition);
+      setSelectedLabel(condition.label);
+      setSelectedDescription(condition.description);
+      setSelectedCode(condition.code);
+    } else {
+      setSelectedCondition(null);
+      setSelectedLabel("");
+      setSelectedDescription("");
+      setSelectedCode(0);
+    }
+  };
   return (
     <div className="w-full max-w-4xl p-2">
       <Sidebar />
       <div className="flex-1 p-8">
-        <h2 className="text-2xl font-bold mb-6">Paramétrer l'Événement</h2>
-        <form className="space-y-6 max-w-full w-full">
-          {/* Champ Code et Description */}
+        <h2 className="text-2xl font-bold mb-6">Ajouter Un Événement</h2>
+        <form className="space-y-6 max-w-full w-full" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col space-y-2">
               <label className="block text-sm font-medium text-gray-700">
@@ -166,8 +182,8 @@ const FormulaireParametrage: React.FC = () => {
                 <input
                   type="text"
                   className="mt-1 block w-full p-2 border rounded"
-                  placeholder="Code"
-                  readOnly
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
                 />
               </div>
             </div>
@@ -180,13 +196,13 @@ const FormulaireParametrage: React.FC = () => {
                 <input
                   type="text"
                   className="mt-1 block w-full p-2 border rounded"
-                  placeholder="Description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
             </div>
           </div>
 
-          {/* Champ Typologie cible et Produits cibles */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col space-y-2">
               <label className="block text-sm font-medium text-gray-700">
@@ -194,11 +210,20 @@ const FormulaireParametrage: React.FC = () => {
               </label>
               <div className="flex items-center space-x-2">
                 <FontAwesomeIcon icon={faBullseye} />
-                <input
-                  type="text"
+                <select
                   className="mt-1 block w-full p-2 border rounded"
-                  placeholder="Typologie cible"
-                />
+                  value={typologiesCible[0]}
+                  onChange={handleTypologieCibleChange}
+                  name="typologieCible"
+                >
+                  {typologiesCible &&
+                    typologiesCible.length > 0 &&
+                    typologiesCible.map((typologie: string) => (
+                      <option key={typologie} value={typologie}>
+                        {typologie}
+                      </option>
+                    ))}
+                </select>
               </div>
             </div>
             <div className="flex flex-col space-y-2">
@@ -207,11 +232,23 @@ const FormulaireParametrage: React.FC = () => {
               </label>
               <div className="flex items-center space-x-2">
                 <FontAwesomeIcon icon={faBoxOpen} />
-                <input
-                  type="text"
+                <select
                   className="mt-1 block w-full p-2 border rounded"
-                  placeholder="Produits cibles"
-                />
+                  value={produitsCible[0]}
+                  onChange={(e) => setProduitCible(e.target.value)}
+                  name="typologieCible"
+                >
+                  {produitsCible &&
+                    produitsCible.length > 0 &&
+                    produitsCible.map((produit: any) => (
+                      <option
+                        key={produit.fuctionalId}
+                        value={produit.functionalId}
+                      >
+                        {produit.functionalId}
+                      </option>
+                    ))}
+                </select>
               </div>
             </div>
           </div>
@@ -225,121 +262,131 @@ const FormulaireParametrage: React.FC = () => {
               <input
                 type="number"
                 className="mt-1 block w-full p-2 border rounded"
-                placeholder="Points"
+                value={points}
+                onChange={(e) => setPoints(parseInt(e.target.value))}
               />
             </div>
           </div>
 
           {/* Conditions Points */}
-          <div>
+          <div className="flex flex-col space-y-2 mt-4">
             <label className="block text-sm font-medium text-gray-700">
               Conditions de Points
             </label>
             <div className="flex items-center space-x-2">
               <FontAwesomeIcon icon={faCheckCircle} />
-              <div className="flex flex-wrap space-x-2">
+              <div
+                className="mt-1 block w-full p-2 border rounded bg-white flex flex-wrap items-center"
+                style={{ minHeight: "40px" }}
+              >
                 {conditions.map((condition, index) => (
                   <div
-                    key={index}
-                    className="bg-blue-100 text-blue-800 rounded-full px-2 py-1 flex items-center space-x-2"
+                    key={condition.id}
+                    className="bg-blue-100 text-blue-800 rounded-full px-2 py-1 flex items-center space-x-2 m-1"
                   >
                     <span>
-                      {condition.type}: si {condition.description} et{" "}
-                      {condition.label}{" "}
+                      {condition.code} - Type: {condition.type},{" "}
+                      {condition.label} | Description: {condition.description}
                     </span>
                     <button
-                      onClick={() => handleDeleteCondition(index)}
+                      onClick={() => handleDeleteCondition(condition.id)}
                       className="text-red-500"
                     >
                       <FontAwesomeIcon icon={faTrash} />
                     </button>
-                    {/* Afficher le "OU" uniquement entre les conditions */}
-                    {conditions.length > 1 &&
-                      conditions.indexOf(condition) < conditions.length - 1 && (
-                        <span className="text-gray-900">OU</span>
-                      )}
+                    {index < conditions.length - 1 && (
+                      <span className="text-gray-900 mx-1">OU</span>
+                    )}
                   </div>
                 ))}
-                <Sheet>
-                  <SheetTrigger>
-                    <button
-                      type="button"
-                      className="p-2 border rounded text-gray-700"
-                    >
-                      <FontAwesomeIcon icon={faPlus} />
-                    </button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Ajouter une Condition de Points</SheetTitle>
-                      <SheetDescription>
-                        Définir les conditions pour l'accumulation de points.
-                      </SheetDescription>
-                    </SheetHeader>
-                    <form className="space-y-4" onSubmit={handleAddCondition}>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Type
-                        </label>
-                        <select
-                          name="type"
-                          className="mt-1 block w-full p-2 border rounded"
-                          value={selectedType}
-                          onChange={handleTypeChange}
-                        >
-                          {Object.keys(typeOptions).map((key) => (
-                            <option key={key} value={key}>
-                              {key}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Label
-                        </label>
-                        <select
-                          name="label"
-                          className="mt-1 block w-full p-2 border rounded"
-                        >
-                          {typeOptions[selectedType]?.labels.map((label) => (
-                            <option key={label} value={label}>
-                              {label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Description
-                        </label>
-                        <input
-                          name="description"
-                          type="text"
-                          className="mt-1 block w-full p-2 border rounded"
-                          placeholder="Description"
-                        />
-                      </div>
-
-                      {error && <p className="text-red-600 text-sm">{error}</p>}
-                      <button
-                        type="submit"
-                        className="bg-orange-500 text-white px-4 py-2 rounded"
-                      >
-                        Ajouter
-                      </button>
-                    </form>
-                  </SheetContent>
-                </Sheet>
               </div>
+              <Sheet>
+                <SheetTrigger>
+                  <button
+                    type="button"
+                    className="p-2 border rounded text-gray-700"
+                  >
+                    <FontAwesomeIcon icon={faPlus} />
+                  </button>
+                </SheetTrigger>
+                <SheetContent>
+      <SheetHeader>
+        <SheetTitle>Ajouter une Condition de Points</SheetTitle>
+        <SheetDescription>
+          Définir les conditions pour l'accumulation de points.
+        </SheetDescription>
+      </SheetHeader>
+      <form className="space-y-4" onSubmit={handleAddCondition}>
+        <div className="flex flex-col space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Sélectionner Condition</label>
+          <Select
+            options={selectOptions}
+            onChange={handleConditionChange}
+            placeholder="Rechercher une condition..."
+            isClearable
+            isSearchable
+          />
+        </div>
+
+    <div className="flex flex-col space-y-2">
+      <label className="block text-sm font-medium text-gray-700">Code</label>
+      <input
+        type="number"
+        className="mt-1 block w-full p-2 border rounded"
+        name="code"
+        value={selectedCode}
+        readOnly
+      />
+    </div>
+    <div className="flex flex-col space-y-2">
+      <label className="block text-sm font-medium text-gray-700">Type</label>
+      <input
+        type="text"
+        className="mt-1 block w-full p-2 border rounded"
+        name="type"
+        value={selectedCondition?.type || ""}
+        readOnly
+      />
+    </div>
+    <div className="flex flex-col space-y-2">
+      <label className="block text-sm font-medium text-gray-700">Label</label>
+      <input
+        type="text"
+        className="mt-1 block w-full p-2 border rounded"
+        name="label"
+        value={selectedLabel}
+        onChange={(e) => setSelectedLabel(e.target.value)}
+      />
+    </div>
+    <div className="flex flex-col space-y-2">
+      <label className="block text-sm font-medium text-gray-700">Description</label>
+      <input
+        type="text"
+        className="mt-1 block w-full p-2 border rounded"
+        name="description"
+        value={selectedDescription}
+        onChange={(e) => setSelectedDescription(e.target.value)}
+      />
+    </div>
+
+    {error && <p className="text-red-600 text-sm">{error}</p>}
+    <button
+      type="submit"
+      className="bg-orange-500 text-white px-4 py-2 rounded"
+    >
+      Ajouter
+    </button>
+  </form>
+</SheetContent>
+              </Sheet>
             </div>
           </div>
 
           <button
             type="submit"
-            className="bg-green-500 text-white px-4 py-2 rounded"
+            className="bg-orange-500 text-white px-4 py-2 rounded"
           >
-            Enregistrer
+           Sauvegarder l'événement
           </button>
         </form>
       </div>

@@ -18,7 +18,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    if (email === 'admin' && password === 'admin') {
+    if (email === 'A.admin@attijari.com' && password === 'admin') {
       navigate('/dashboard');
     } else {
       alert('Invalid credentials');

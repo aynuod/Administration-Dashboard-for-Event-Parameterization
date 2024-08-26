@@ -1,6 +1,6 @@
 import React from 'react';
 import Sidebar from './Sidebar';
-import StatistiquesDesTransactions from './StatistiquesDesTransactions';
+// import StatistiquesDesTransactions from './StatistiquesDesTransactions';
 import Evenements from './Evenements';
 
 const Dashboard: React.FC = () => {
@@ -13,9 +13,9 @@ const Dashboard: React.FC = () => {
           <div id="evenements">
             <Evenements />
           </div>
-          <div id="statistiques-des-transactions">
+          {/* <div id="statistiques-des-transactions">
             <StatistiquesDesTransactions />
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

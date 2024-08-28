@@ -1,1 +1,1 @@
-# React + TypeScript + Vite
+# Interface ADMIN(login+events/parametrage)
